@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Displays DNS subdomain information using dig and awk
+# Displays information about subdomains for a given domain
 
 domain="$1"
 subdomain="$2"
