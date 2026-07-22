@@ -9,7 +9,7 @@ check_subdomain() {
     local dom="$2"
 
     # shellcheck disable=SC2086
-    res=$(dig "${sub}.${dom}" | awk '/^;; ANSWER SECTION:/ {flag=1; next} /^$/ {flag=0} flag {print $4, $5; exit}')
+    res=$(dig +noall +answer "${sub}.${dom}" A | awk 'NR==1 {print $(NF-1), $NF}')
     record_type=$(echo "$res" | awk '{print $1}')
     destination=$(echo "$res" | awk '{print $2}')
 
