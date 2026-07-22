@@ -1,24 +1,25 @@
 #!/usr/bin/env bash
-# Displays DNS subdomain information using dig and awk
+# Script that displays information about subdomains for a given domain
 
 domain="$1"
 subdomain="$2"
 
-audit_subdomain() {
-    local s="$1"
-    local d="$2"
-    dig "${s}.${d}" | awk -v sub="$s" '/ANSWER SECTION:/ {
-        getline
-        print "The subdomain " sub " is a " $4 " record and points to " $5
-    }'
+check_subdomain() {
+    local sub="$1"
+    local dom="$2"
+
+    res=$(dig "${sub}.${dom}" | awk '/^;; ANSWER SECTION:/ {flag=1; next} /^$/ {flag=0} flag {print $4, $5; exit}')
+    record_type=$(echo "$res" | awk '{print $1}')
+    destination=$(echo "$res" | awk '{print $2}')
+
+    echo "The subdomain ${sub} is a ${record_type} record and points to ${destination}"
 }
 
-# Ignore shellcheck case SC2086
-# shellcheck disable=SC2086
 if [ -n "$subdomain" ]; then
-    audit_subdomain "$subdomain" "$domain"
+    check_subdomain "$subdomain" "$domain"
 else
-    for sub in www lb-01 web-01 web-02; do
-        audit_subdomain "$sub" "$domain"
-    done
+    check_subdomain "www" "$domain"
+    check_subdomain "lb-01" "$domain"
+    check_subdomain "web-01" "$domain"
+    check_subdomain "web-02" "$domain"
 fi
