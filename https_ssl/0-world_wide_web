@@ -8,7 +8,7 @@ check_subdomain() {
     local sub="$1"
     local dom="$2"
 
-    res=$(dig "${sub}.${dom}" | awk '/^;; ANSWER SECTION:/ {flag=1; next} /^$/ {flag=0} flag {print $4, $5; exit}')
+    res=$(dig @8.8.8.8 "${sub}.${dom}" | awk '/^;; ANSWER SECTION:/ {flag=1; next} /^$/ {flag=0} flag {print $4, $5; exit}')
     record_type=$(echo "$res" | awk '{print $1}')
     destination=$(echo "$res" | awk '{print $2}')
 
