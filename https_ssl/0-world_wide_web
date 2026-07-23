@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Script that displays information about subdomains for a domain name
+# Displays information about subdomains for a domain
 
 domain="$1"
 subdomain="$2"
@@ -7,7 +7,7 @@ subdomain="$2"
 audit_subdomain() {
     local dom="$1"
     local sub="$2"
-    
+    # shellcheck disable=SC2086
     dig "${sub}.${dom}" | grep -A1 'ANSWER SECTION:' | tail -n1 | awk '{print "The subdomain " "'"$sub"'" " is a " $4 " record and points to " $5}'
 }
 
