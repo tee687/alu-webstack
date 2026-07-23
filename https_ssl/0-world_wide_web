@@ -8,7 +8,7 @@ audit_subdomain() {
     local dom="$1"
     local sub="$2"
     # shellcheck disable=SC2086
-    dig "${sub}.${dom}" | grep -A1 'ANSWER SECTION:' | tail -n1 | awk '{print "The subdomain " "'"$sub"'" " is a " $4 " record and points to " $5}'
+    dig "${sub}.${dom}" | grep -A1 'ANSWER SECTION:' | tail -n1 | awk -v s="$sub" '{print "The subdomain " s " is a " $4 " record and points to " $5}'
 }
 
 if [ -n "$subdomain" ]; then
