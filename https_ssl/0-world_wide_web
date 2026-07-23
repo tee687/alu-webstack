@@ -1,20 +1,24 @@
 #!/usr/bin/env bash
-# Displays information about subdomains for a domain
-
-domain="$1"
-subdomain="$2"
-
-audit_subdomain() {
-    local dom="$1"
-    local sub="$2"
-    # shellcheck disable=SC2086
-    dig "${sub}.${dom}" | grep -A1 'ANSWER SECTION:' | tail -n1 | awk -v s="$sub" '{print "The subdomain " s " is a " $4 " record and points to " $5}'
+#Configure my domain zone so that the subdomain www points to my load-balancer IP (lb-01)
+check_subdomain()
+{
+    sub=$1
+    domain=$2
+    result=$(dig "$sub.$domain" | awk '/ANSWER SECTION/{getline; print $4 , $5}')
+    record=$(echo "$result" | awk '{print $1}')
+    destination=$(echo "$result" | awk '{print $2}')
+    echo "The subdomain $sub is a $record record and points to $destination"
 }
 
-if [ -n "$subdomain" ]; then
-    audit_subdomain "$domain" "$subdomain"
-else
-    for sub in www lb-01 web-01 web-02; do
-        audit_subdomain "$domain" "$sub"
+domain=$1
+subdomain=$2
+
+if [ -z "$subdomain" ]
+then
+    for sub in www lb-01 web-01 web-02
+    do
+        check_subdomain $sub $domain
     done
+else
+   check_subdomain $subdomain $domain
 fi
