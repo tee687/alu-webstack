@@ -1,24 +1,30 @@
 #!/usr/bin/env bash
-#Configure my domain zone so that the subdomain www points to my load-balancer IP (lb-01)
+# Configure my domain zone so that the subdomain www points to my load-balancer IP (lb-01)
+
 check_subdomain()
 {
-    sub=$1
-    domain=$2
-    result=$(dig "$sub.$domain" | awk '/ANSWER SECTION/{getline; print $4 , $5}')
-    record=$(echo "$result" | awk '{print $1}')
-    destination=$(echo "$result" | awk '{print $2}')
-    echo "The subdomain $sub is a $record record and points to $destination"
+    local sub=$1
+    local domain=$2
+    
+    # Use +short to get only the IP address
+    local destination
+    destination=$(dig +short "$sub.$domain" | tail -n1)
+
+    # Output 'A' as record type when an IP is returned
+    if [ -n "$destination" ]; then
+        echo "The subdomain $sub is a A record and points to $destination"
+    else
+        echo "The subdomain $sub is a  record and points to "
+    fi
 }
 
 domain=$1
 subdomain=$2
 
-if [ -z "$subdomain" ]
-then
-    for sub in www lb-01 web-01 web-02
-    do
-        check_subdomain $sub $domain
+if [ -z "$subdomain" ]; then
+    for sub in www lb-01 web-01 web-02; do
+        check_subdomain "$sub" "$domain"
     done
 else
-   check_subdomain $subdomain $domain
+    check_subdomain "$subdomain" "$domain"
 fi
