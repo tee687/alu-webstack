@@ -19,7 +19,10 @@ defaults
 
 frontend http_front
     bind *:80
-    bind *:443 ssl crt /etc/haproxy/certs/www.pem
+    # Redirect all HTTP traffic to HTTPS using a 301 (Moved Permanently) status code
+    http-request redirect scheme https code 301 if !{ ssl_fc }
+frontend http_front
+    bind *:443 ssl crt /etc/haproxy/certs/www.tendaimtakiwa.tech.pem
     http-request add-header X-Forwarded-Proto https
     default_backend http_back
 
