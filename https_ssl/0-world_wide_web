@@ -1,26 +1,20 @@
 #!/usr/bin/env bash
-# Script that displays information about subdomains for a given domain
+# Script that displays information about subdomains for a domain name
 
 domain="$1"
 subdomain="$2"
 
-check_subdomain() {
-    local sub="$1"
-    local dom="$2"
-
-    # shellcheck disable=SC2086
-    res=$(dig +noall +answer "${sub}.${dom}" A | awk 'NR==1 {print $(NF-1), $NF}')
-    record_type=$(echo "$res" | awk '{print $1}')
-    destination=$(echo "$res" | awk '{print $2}')
-
-    echo "The subdomain ${sub} is a ${record_type} record and points to ${destination}"
+audit_subdomain() {
+    local dom="$1"
+    local sub="$2"
+    
+    dig "${sub}.${dom}" | grep -A1 'ANSWER SECTION:' | tail -n1 | awk '{print "The subdomain " "'"$sub"'" " is a " $4 " record and points to " $5}'
 }
 
 if [ -n "$subdomain" ]; then
-    check_subdomain "$subdomain" "$domain"
+    audit_subdomain "$domain" "$subdomain"
 else
-    check_subdomain "www" "$domain"
-    check_subdomain "lb-01" "$domain"
-    check_subdomain "web-01" "$domain"
-    check_subdomain "web-02" "$domain"
+    for sub in www lb-01 web-01 web-02; do
+        audit_subdomain "$domain" "$sub"
+    done
 fi
