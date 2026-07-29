@@ -5,25 +5,24 @@ global
     user haproxy
     group haproxy
     daemon
-    maxconn 2048
-    tune.ssl.default-dh-param 2048
 
 defaults
     log global
     mode http
     option httplog
     option dontlognull
-    timeout connect 5000ms
-    timeout client 50000ms
-    timeout server 50000ms
+    timeout connect 5000
+    timeout client 50000
+    timeout server 50000
 
 frontend http_front
     bind *:80
-    bind *:443 ssl crt /etc/haproxy/certs/www.pem
-    http-request add-header X-Forwarded-Proto https
-    default_backend http_back
+    bind *:443 ssl crt /etc/haproxy/certs/haproxy.pem
+    mode http
+    default_backend web_servers
 
-backend http_back
+backend web_servers
+    mode http
     balance roundrobin
-    server web-01 3.86.154.203:80 check
-    server web-02 18.212.34.58:80 check
+    server 7157-web-01 3.86.154.203:80 check
+    server 7157-web-02 18.212.34.58:80 check
